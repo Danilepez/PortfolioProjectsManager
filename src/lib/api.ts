@@ -7,7 +7,6 @@ const api = axios.create({
   },
 });
 
-// Interceptor para manejar errores globalmente
 api.interceptors.response.use(
   (response) => response,
   (error) => {

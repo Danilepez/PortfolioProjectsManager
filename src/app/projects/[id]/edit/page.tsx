@@ -20,7 +20,6 @@ const EditProjectPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Cargar datos del proyecto
   useEffect(() => {
     const fetchProject = async () => {
       if (id) {
@@ -86,7 +85,6 @@ const EditProjectPage: React.FC = () => {
     );
   }
 
-  // Preparar datos iniciales para el formulario
   const initialFormData: ProjectFormData = {
     title: project.title,
     description: project.description,

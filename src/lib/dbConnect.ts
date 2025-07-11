@@ -6,7 +6,6 @@ if (!MONGODB_URI) {
   throw new Error('MONGODB_URI no definida en .env.local');
 }
 
-// Cachear la conexión para evitar múltiples conexiones en desarrollo
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;

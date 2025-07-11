@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Project from '../models/Project';
 import dbConnect from '../lib/dbConnect';
 
-// Helper para respuestas de error
 const handleError = (res: NextApiResponse, error: any, status = 500) => {
   res.status(status).json({ 
     success: false, 
@@ -10,7 +9,7 @@ const handleError = (res: NextApiResponse, error: any, status = 500) => {
   });
 };
 
-// GET: Obtener todos los proyectos
+// GET
 export const getProjects = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await dbConnect();
@@ -21,7 +20,7 @@ export const getProjects = async (req: NextApiRequest, res: NextApiResponse) => 
   }
 };
 
-// POST: Crear nuevo proyecto
+// POST
 export const createProject = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await dbConnect();
@@ -33,7 +32,7 @@ export const createProject = async (req: NextApiRequest, res: NextApiResponse) =
   }
 };
 
-// PUT: Actualizar proyecto
+// PUT
 export const updateProject = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await dbConnect();
@@ -53,7 +52,7 @@ export const updateProject = async (req: NextApiRequest, res: NextApiResponse) =
   }
 };
 
-// DELETE: Eliminar proyecto
+// DELETE
 export const deleteProject = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await dbConnect();
@@ -70,7 +69,7 @@ export const deleteProject = async (req: NextApiRequest, res: NextApiResponse) =
   }
 };
 
-// GET : Obtener un proyecto por ID
+// GET ID
 export const getProjectById = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     await dbConnect();

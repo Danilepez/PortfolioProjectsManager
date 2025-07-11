@@ -5,7 +5,7 @@ import {
   Container, Typography, Button, 
   Box, CircularProgress, Alert 
 } from '@mui/material';
-import { useRouter } from 'next/navigation'; // Cambiado de next/router
+import { useRouter } from 'next/navigation'; 
 import ProjectCard from '../components/ProjectCard';
 import SearchBar from '../components/SearchBar';
 import TechnologyFilter from '../components/TechnologyFilter';
@@ -21,7 +21,6 @@ export default function ProjectListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTech, setSelectedTech] = useState<string[]>([]);
   
-  // Obtener todas las tecnologías únicas de los proyectos
   const allTechnologies = useMemo(() => {
     const techSet = new Set<string>();
     projects.forEach(project => {
@@ -30,7 +29,6 @@ export default function ProjectListPage() {
     return Array.from(techSet).sort();
   }, [projects]);
 
-  // Cargar proyectos
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -49,11 +47,9 @@ export default function ProjectListPage() {
     fetchProjects();
   }, []);
 
-  // Filtrar proyectos
   useEffect(() => {
     let result = projects;
     
-    // Aplicar filtro de búsqueda
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(project => 
@@ -62,7 +58,6 @@ export default function ProjectListPage() {
       );
     }
     
-    // Aplicar filtro de tecnologías
     if (selectedTech.length > 0) {
       result = result.filter(project => 
         selectedTech.every(tech => project.technologies.includes(tech))
@@ -72,7 +67,6 @@ export default function ProjectListPage() {
     setFilteredProjects(result);
   }, [projects, searchTerm, selectedTech]);
 
-  // Eliminar un proyecto
   const handleDeleteProject = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       try {
