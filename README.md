@@ -160,11 +160,3 @@ npm run lint     # Linter ESLint
 
 ⭐ ¡No olvides dar una estrella si este proyecto te fue útil!
 ```
-
-## Notes
-
-Este README está basado en la estructura real de tu repositorio Portfolio Projects Manager.  Incluye todas las características principales que identifiqué en el código: la interfaz con Material-UI, la gestión de proyectos, la conexión a MongoDB.  El README actual es muy básico y solo contiene la plantilla por defecto de Next.js, por lo que esta versión proporciona una documentación mucho más completa y profesional. [9](#0-8) 
-
-Wiki pages you might want to explore:
-- [User Interface (Danilepez/PortfolioProjectsManager)](/wiki/Danilepez/PortfolioProjectsManager#4)
-- [Environment & Deployment (Danilepez/PortfolioProjectsManager)](/wiki/Danilepez/PortfolioProjectsManager#5.3)
