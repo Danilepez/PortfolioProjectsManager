@@ -1,64 +1,47 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
 import { useRouter, useParams } from 'next/navigation';
-import { 
-  Button, Container, Typography, CircularProgress, Alert 
-} from '@mui/material';
+import { Container, Typography, Alert, Button, Box, CircularProgress } from '@mui/material';
 import ProjectForm from '../../../components/ProjectForm';
 import api from '@/lib/api';
 import { Project, ProjectFormData } from '@/types/project';
 
-const EditProjectPage: React.FC = () => {
+export default function EditProjectPage() {
   const router = useRouter();
-  const params = useParams();
-  const id = params?.id;
-  
+  const params = useParams() as Record<string, string | string[]>;
+  const id = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : undefined;
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchProject = async () => {
+    (async () => {
       if (id) {
         try {
           setLoading(true);
-          const response = await api.get(`/projects/${id}`);
-          
-          if (response.data.success) {
-            setProject(response.data.data);
-          } else {
-            setError('Project not found');
-          }
-        } catch (err) {
-          console.error('Error fetching project:', err);
-          setError('Failed to load project. Please try again.');
+          const res = await api.get(`/projects/${id}`);
+          if (res.data.success) setProject(res.data.data);
+          else setError('Proyecto no encontrado');
+        } catch {
+          setError('Error al cargar el proyecto.');
         } finally {
           setLoading(false);
         }
       }
-    };
-    
-    fetchProject();
+    })();
   }, [id]);
 
-  const handleSubmit = async (formData: ProjectFormData) => {
+  const handleSubmit = async (data: ProjectFormData) => {
     try {
       setIsSubmitting(true);
       setError('');
-      
-      const response = await api.put(`/projects/${id}`, formData);
-      
-      if (response.data.success) {
-        router.push('/projects');
-      } else {
-        setError('Failed to update project. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error updating project:', err);
-      setError('An unexpected error occurred. Please try again.');
+      const res = await api.put(`/projects/${id}`, data);
+      if (res.data.success) router.push('/projects');
+      else setError('Error al actualizar el proyecto.');
+    } catch {
+      setError('Error inesperado.');
     } finally {
       setIsSubmitting(false);
     }
@@ -72,20 +55,20 @@ const EditProjectPage: React.FC = () => {
     );
   }
 
-  if (error || !project) {
+  if (!project || error) {
     return (
       <Container sx={{ py: 4 }}>
         <Alert severity="error" sx={{ mb: 3 }}>
-          {error || 'Project not found'}
+          {error || 'Proyecto no encontrado'}
         </Alert>
         <Button variant="outlined" onClick={() => router.push('/projects')}>
-          Back to Projects
+          Volver a Proyectos
         </Button>
       </Container>
     );
   }
 
-  const initialFormData: ProjectFormData = {
+  const initialData: ProjectFormData = {
     title: project.title,
     description: project.description,
     url: project.url,
@@ -93,31 +76,13 @@ const EditProjectPage: React.FC = () => {
   };
 
   return (
-    <>
-      <Head>
-        <title>Edit Project</title>
-        <meta name="description" content="Edit a portfolio project" />
-      </Head>
-      
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Edit Project
-        </Typography>
-        
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-        
-        <ProjectForm 
-          initialData={initialFormData} 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting} 
-        />
-      </Container>
-    </>
+    <Container maxWidth="md" sx={{ py: 4, backgroundColor: '#fff' }}>
+      <Typography variant="h4" gutterBottom>
+        Editar Proyecto
+      </Typography>
+      <Box sx={{ mt: 2 }}>
+        <ProjectForm initialData={initialData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      </Box>
+    </Container>
   );
-};
-
-export default EditProjectPage;
+}

@@ -1,11 +1,7 @@
 'use client';
 
 import React from 'react';
-import { 
-  Box, Button, Typography, Chip, FormControl, 
-  InputLabel, Select, MenuItem, OutlinedInput
-} from '@mui/material';
-import CancelIcon from '@mui/icons-material/Cancel';
+import { Box, Typography, Autocomplete, Chip, TextField } from '@mui/material';
 
 interface TechnologyFilterProps {
   technologies: string[];
@@ -13,68 +9,29 @@ interface TechnologyFilterProps {
   onTechChange: (tech: string[]) => void;
 }
 
-const TechnologyFilter: React.FC<TechnologyFilterProps> = ({ 
-  technologies, 
-  selectedTech, 
-  onTechChange 
-}) => {
+export default function TechnologyFilter({
+  technologies,
+  selectedTech,
+  onTechChange
+}: TechnologyFilterProps) {
   return (
-    <Box sx={{ mb: 3 }}>
-      <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500 }}>
-        Filter by Technology
+    <Box sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
+      <Typography variant="subtitle1" gutterBottom>
+        Filtrar por tecnología
       </Typography>
-      
-      <FormControl fullWidth sx={{ maxWidth: 500 }}>
-        <InputLabel id="tech-filter-label">Select technologies</InputLabel>
-        <Select
-          labelId="tech-filter-label"
-          multiple
-          value={selectedTech}
-          onChange={(e) => onTechChange(e.target.value as string[])}
-          input={<OutlinedInput label="Select technologies" />}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
-              ))}
-            </Box>
-          )}
-        >
-          {technologies.map((tech) => (
-            <MenuItem key={tech} value={tech}>
-              {tech}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      
-      {selectedTech.length > 0 && (
-        <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" sx={{ mr: 1 }}>
-            Active filters:
-          </Typography>
-          {selectedTech.map((tech) => (
-            <Chip
-              key={tech}
-              label={tech}
-              onDelete={() => onTechChange(selectedTech.filter(t => t !== tech))}
-              deleteIcon={<CancelIcon />}
-              variant="outlined"
-              sx={{ mr: 1 }}
-            />
-          ))}
-          <Button 
-            size="small" 
-            color="secondary"
-            onClick={() => onTechChange([])}
-            sx={{ ml: 'auto' }}
-          >
-            Clear all
-          </Button>
-        </Box>
-      )}
+      <Autocomplete
+        multiple
+        options={technologies}
+        value={selectedTech}
+        onChange={(_, value) => onTechChange(value)}
+        freeSolo
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip variant="outlined" label={option} {...getTagProps({ index })} key={option} />
+          ))
+        }
+        renderInput={(params) => <TextField {...params} variant="outlined" placeholder="Añadir o seleccionar tech" />}
+      />
     </Box>
   );
-};
-
-export default TechnologyFilter;
+}

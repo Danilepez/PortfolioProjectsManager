@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { TextField, InputAdornment, IconButton } from '@mui/material';
+import { TextField, InputAdornment, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -10,31 +10,37 @@ interface SearchBarProps {
   onSearchChange: (term: string) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => {
+export default function SearchBar({ searchTerm, onSearchChange }: SearchBarProps) {
   return (
-    <TextField
-      fullWidth
-      variant="outlined"
-      placeholder="Search projects..."
-      value={searchTerm}
-      onChange={(e) => onSearchChange(e.target.value)}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon />
-          </InputAdornment>
-        ),
-        endAdornment: searchTerm && (
-          <InputAdornment position="end">
-            <IconButton onClick={() => onSearchChange('')}>
-              <ClearIcon />
-            </IconButton>
-          </InputAdornment>
-        ),
-      }}
-      sx={{ mb: 3, maxWidth: 500 }}
-    />
+    <Box sx={{ maxWidth: 600, mx: 'auto', mb: 4 }}>
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Buscar proyectos..."
+        value={searchTerm}
+        onChange={(e) => onSearchChange(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon color="action" />
+            </InputAdornment>
+          ),
+          endAdornment: searchTerm && (
+            <InputAdornment position="end">
+              <ClearIcon color="action" sx={{ cursor: 'pointer' }} onClick={() => onSearchChange('')} />
+            </InputAdornment>
+          ),
+        }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+            transition: 'box-shadow 0.3s',
+            '&.Mui-focused': {
+              boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}`
+            }
+          }
+        }}
+      />
+    </Box>
   );
-};
-
-export default SearchBar;
+}

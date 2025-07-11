@@ -1,63 +1,45 @@
 'use client';
 
 import React, { useState } from 'react';
-import Head from 'next/head';
-import { Container, Typography, Alert } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { Container, Typography, Alert, Button, Box } from '@mui/material';
 import ProjectForm from '../../components/ProjectForm';
 import api from '@/lib/api';
 import { ProjectFormData } from '@/types/project';
 
-const NewProjectPage: React.FC = () => {
+export default function NewProjectPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (formData: ProjectFormData) => {
+  const handleSubmit = async (data: ProjectFormData) => {
     try {
       setIsSubmitting(true);
       setError('');
-      
-      const response = await api.post('/projects', formData);
-      
-      if (response.data.success) {
-        router.push('/projects');
-      } else {
-        setError('Failed to create project. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error creating project:', err);
-      setError('An unexpected error occurred. Please try again.');
+      const res = await api.post('/projects', data);
+      if (res.data.success) router.push('/projects');
+      else setError('No se pudo crear el proyecto.');
+    } catch {
+      setError('Error inesperado.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <Head>
-        <title>Add New Project</title>
-        <meta name="description" content="Add a new portfolio project" />
-      </Head>
-      
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Add New Project
-        </Typography>
-        
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-        
-        <ProjectForm 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting} 
-        />
-      </Container>
-    </>
+    <Container maxWidth="md" sx={{ py: 4, backgroundColor: '#fff' }}>
+      <Typography variant="h4" gutterBottom>
+        Nuevo Proyecto
+      </Typography>
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+      <Box sx={{ mt: 2 }}>
+        <ProjectForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      </Box>
+      <Box mt={2}>
+        <Button variant="outlined" onClick={() => router.push('/projects')}>
+          Cancelar
+        </Button>
+      </Box>
+    </Container>
   );
-};
-
-export default NewProjectPage;
+}

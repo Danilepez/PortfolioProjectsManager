@@ -1,43 +1,38 @@
 'use client';
 
 import React from 'react';
-import { 
-  AppBar, Toolbar, Typography, 
-  Button, Container, Box
-} from '@mui/material';
 import Link from 'next/link';
+import { AppBar, Toolbar, Button, Typography, Box, Container } from '@mui/material';
 
-const Header: React.FC = () => {
+export default function Header() {
   return (
-    <AppBar position="static" color="primary" elevation={0}>
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            <Link href="/" passHref>
-              Portfolio Manager
-            </Link>
+    <AppBar position="sticky" elevation={0} sx={{ backgroundColor: 'white', borderBottom: '1px solid #ddd' }}>
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ py: 2 }}>
+          <Typography
+            variant="h6"
+            component={Link}
+            href="/"
+            sx={{
+              flexGrow: 1,
+              fontWeight: 700,
+              color: '#333',
+              textDecoration: 'none',
+              fontSize: '1.5rem',
+            }}
+          >
+            Administrador de Proyectos
           </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button 
-              color="inherit" 
-              component={Link}
-              href="/projects"
-            >
-              Projects
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button component={Link} href="/" sx={{ color: '#333', textTransform: 'none' }}>
+              Inicio
             </Button>
-            <Button 
-              color="inherit" 
-              component={Link}
-              href="/projects/new"
-            >
-              Add Project
+            <Button component={Link} href="/projects" sx={{ color: '#333', textTransform: 'none' }}>
+              Proyectos
             </Button>
           </Box>
         </Toolbar>
       </Container>
     </AppBar>
   );
-};
-
-export default Header;
+}

@@ -1,11 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Container, Typography, Button, 
-  Box, CircularProgress, Alert 
-} from '@mui/material';
-import { useRouter } from 'next/navigation'; 
+import { Container, Typography, Button, Box, Skeleton, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import ProjectCard from '../components/ProjectCard';
 import SearchBar from '../components/SearchBar';
 import TechnologyFilter from '../components/TechnologyFilter';
@@ -15,138 +13,134 @@ import { Project } from '@/types/project';
 export default function ProjectListPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [filtered, setFiltered] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTech, setSelectedTech] = useState<string[]>([]);
-  
-  const allTechnologies = useMemo(() => {
-    const techSet = new Set<string>();
-    projects.forEach(project => {
-      project.technologies.forEach(tech => techSet.add(tech));
-    });
-    return Array.from(techSet).sort();
+
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const allTech = useMemo(() => {
+    const s = new Set<string>();
+    projects.forEach(p => p.technologies.forEach(t => s.add(t)));
+    return Array.from(s).sort();
   }, [projects]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    (async () => {
       try {
         setLoading(true);
-        const response = await api.get('/projects');
-        setProjects(response.data.data);
+        const res = await api.get('/projects');
+        setProjects(res.data.data);
         setError('');
-      } catch (err) {
-        console.error('Error fetching projects:', err);
-        setError('Failed to load projects. Please try again later.');
+      } catch {
+        setError('Error al cargar proyectos');
       } finally {
         setLoading(false);
       }
-    };
-    
-    fetchProjects();
+    })();
   }, []);
 
   useEffect(() => {
-    let result = projects;
-    
+    let datos = projects;
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(project => 
-        project.title.toLowerCase().includes(term) || 
-        project.description.toLowerCase().includes(term)
+      datos = datos.filter(p =>
+        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
     if (selectedTech.length > 0) {
-      result = result.filter(project => 
-        selectedTech.every(tech => project.technologies.includes(tech))
+      datos = datos.filter(p =>
+        selectedTech.every(t => p.technologies.includes(t))
       );
     }
-    
-    setFilteredProjects(result);
+    setFiltered(datos);
   }, [projects, searchTerm, selectedTech]);
 
-  const handleDeleteProject = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
-      try {
-        await api.delete(`/projects/${id}`);
-        setProjects(prev => prev.filter(project => project._id !== id));
-      } catch (err) {
-        console.error('Error deleting project:', err);
-        setError('Failed to delete project. Please try again.');
-      }
+  const openDeleteDialog = (id: string) => {
+    setDeleteId(id);
+    setOpenDialog(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteId(null);
+    setOpenDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await api.delete(`/projects/${deleteId}`);
+      setProjects(prev => prev.filter(p => p._id !== deleteId));
+      setError('');
+    } catch {
+      setError('No se pudo eliminar');
+    } finally {
+      closeDeleteDialog();
     }
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4, backgroundColor: '#fff', minHeight: 'calc(100vh - 64px)' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" component="h1">
-          Portfolio Projects
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
+          Mis Proyectos
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={() => router.push('/projects/new')}
-        >
-          Add New Project
+        <Button variant="contained" onClick={() => router.push('/projects/new')}>
+          + Nuevo Proyecto
         </Button>
       </Box>
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-      
-      <SearchBar 
-        searchTerm={searchTerm} 
-        onSearchChange={setSearchTerm} 
-      />
-      
-      <TechnologyFilter 
-        technologies={allTechnologies} 
-        selectedTech={selectedTech} 
-        onTechChange={setSelectedTech} 
-      />
-      
+
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+
+      <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+      <TechnologyFilter technologies={allTech} selectedTech={selectedTech} onTechChange={setSelectedTech} />
+
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : filteredProjects.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="h6" color="textSecondary">
-            No projects found
-          </Typography>
-          <Button 
-            variant="outlined" 
-            color="primary" 
-            sx={{ mt: 2 }}
-            onClick={() => {
-              setSearchTerm('');
-              setSelectedTech([]);
-            }}
-          >
-            Clear Filters
-          </Button>
-        </Box>
-      ) : (
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-          gap: 3 
-        }}>
-          {filteredProjects.map((project) => (
-            <ProjectCard 
-              key={project._id}
-              project={project} 
-              onDelete={handleDeleteProject} 
-            />
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} variant="rectangular" width={300} height={200} />
           ))}
         </Box>
+      ) : filtered.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 6 }}>
+          <Typography variant="h6" color="text.secondary">
+            No se encontraron proyectos
+          </Typography>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+          <AnimatePresence>
+            {filtered.map((p, idx) => (
+              <motion.div
+                key={p._id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <ProjectCard
+                  project={p}
+                  onDelete={() => openDeleteDialog(p._id)} 
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </Box>
       )}
+
+      <Dialog open={openDialog} onClose={closeDeleteDialog}>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          ¿Estás seguro de que deseas eliminar este proyecto?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDeleteDialog}>Cancelar</Button>
+          <Button onClick={handleConfirmDelete} color="error">Eliminar</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

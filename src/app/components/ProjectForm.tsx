@@ -1,12 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  TextField, Button, Box, 
-  Chip, Stack, Typography
+import {
+  TextField,
+  Button,
+  Box,
+  Stack,
+  IconButton,
+  Chip,
+  Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import SendIcon from '@mui/icons-material/Send';
 import { ProjectFormData } from '@/types/project';
 
 interface ProjectFormProps {
@@ -15,39 +21,40 @@ interface ProjectFormProps {
   isSubmitting: boolean;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ 
-  initialData, 
-  onSubmit, 
-  isSubmitting 
-}) => {
-  const [formData, setFormData] = useState<ProjectFormData>(initialData || {
+export default function ProjectForm({
+  initialData,
+  onSubmit,
+  isSubmitting,
+}: ProjectFormProps) {
+  const [formData, setFormData] = useState<ProjectFormData>({
     title: '',
     description: '',
     url: '',
     technologies: [],
+    ...initialData,
   });
-  
-  const [newTech, setNewTech] = useState('');
+  const [techInput, setTechInput] = useState('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddTech = () => {
-    if (newTech.trim() && !formData.technologies.includes(newTech.trim())) {
-      setFormData(prev => ({
+    const t = techInput.trim();
+    if (t && !formData.technologies.includes(t)) {
+      setFormData((prev) => ({
         ...prev,
-        technologies: [...prev.technologies, newTech.trim()]
+        technologies: [...prev.technologies, t],
       }));
-      setNewTech('');
+      setTechInput('');
     }
   };
 
-  const handleRemoveTech = (tech: string) => {
-    setFormData(prev => ({
+  const handleDeleteTech = (tech: string) => {
+    setFormData((prev) => ({
       ...prev,
-      technologies: prev.technologies.filter(t => t !== tech)
+      technologies: prev.technologies.filter((x) => x !== tech),
     }));
   };
 
@@ -57,100 +64,72 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+    <form onSubmit={handleSubmit}>
       <Stack spacing={3}>
         <TextField
-          fullWidth
-          required
-          label="Project Title"
+          label="Título"
           name="title"
           value={formData.title}
-          onChange={handleInputChange}
-        />
-        
-        <TextField
+          onChange={handleChange}
           fullWidth
           required
-          label="Description"
+        />
+        <TextField
+          label="Descripción"
           name="description"
           value={formData.description}
-          onChange={handleInputChange}
+          onChange={handleChange}
           multiline
           rows={4}
-        />
-        
-        <TextField
           fullWidth
           required
-          label="Project URL"
+        />
+        <TextField
+          label="URL del proyecto"
           name="url"
           value={formData.url}
-          onChange={handleInputChange}
-          placeholder="https://example.com"
+          onChange={handleChange}
+          fullWidth
+          required
         />
-        
         <Box>
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 500 }}>
-            Technologies
+          <Typography variant="subtitle1" gutterBottom>
+            Tecnologías
           </Typography>
-          
-          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
             <TextField
-              fullWidth
-              label="Add technology"
-              value={newTech}
-              onChange={(e) => setNewTech(e.target.value)}
-              onKeyPress={(e) => {
+              label="Agregar tecnología"
+              value={techInput}
+              onChange={(e) => setTechInput(e.target.value)}
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   handleAddTech();
                 }
               }}
+              size="small"
             />
-            <Button 
-              variant="outlined" 
-              startIcon={<AddIcon />} 
-              onClick={handleAddTech}
-              disabled={!newTech.trim()}
-              sx={{ minWidth: '120px' }}
-            >
-              Add
-            </Button>
+            <IconButton onClick={handleAddTech}>
+              <AddIcon color="primary" />
+            </IconButton>
           </Stack>
-          
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {formData.technologies.map((tech) => (
-              <Chip
-                key={tech}
-                label={tech}
-                onDelete={() => handleRemoveTech(tech)}
-                deleteIcon={<DeleteIcon />}
-              />
+              <Chip key={tech} label={tech} onDelete={() => handleDeleteTech(tech)} />
             ))}
           </Box>
         </Box>
+        <Box display="flex" justifyContent="flex-end">
+          <Button
+            type="submit"
+            variant="contained"
+            startIcon={initialData ? <SaveIcon /> : <SendIcon />}
+            disabled={isSubmitting}
+          >
+            {initialData ? 'Guardar' : 'Crear'}
+          </Button>
+        </Box>
       </Stack>
-      
-      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-        <Button 
-          variant="outlined" 
-          color="secondary" 
-          href="/projects"
-          LinkComponent="a"
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          variant="contained" 
-          color="primary"
-          disabled={isSubmitting}
-        >
-          {initialData ? 'Update Project' : 'Create Project'}
-        </Button>
-      </Box>
-    </Box>
+    </form>
   );
-};
-
-export default ProjectForm;
+}
