@@ -1,8 +1,3 @@
-## Answer
-
-Basándome en tu repositorio **Portfolio Projects Manager**, aquí tienes un README.md completo y profesional: 
-
-```markdown
 # 📁 Portfolio Projects Manager
 
 Un administrador de proyectos moderno y elegante construido con Next.js, Material-UI y MongoDB para organizar, editar y presentar tus proyectos de forma profesional.
